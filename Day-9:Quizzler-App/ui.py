@@ -17,6 +17,7 @@ class QuizInterface:
         self.canvas = Canvas(width=300, height=250, bg="white")
         self.question_text = self.canvas.create_text(150, 
                                                      125,  
+                                                     width=280,
                                                      text="TODO: Question text", 
                                                      fill=THEME_COLOR,
                                                      font=("Arial",20,"italic")
