@@ -1,6 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
+from twilio.rest import Client
 
 #importing api keys / stock names
 
@@ -8,6 +9,9 @@ load_dotenv()
 
 alpha_API = os.getenv("API_KEY")
 news_API = os.getenv("NEWS_API_KEY")
+twilio_API = os.getenv("TWILIO_API_KEY")
+account_SID = os.getenv("ACCOUNT_SID")
+
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -46,6 +50,7 @@ fields = {
 #find the difference between each key and see
 #if that difference is greater than 5%
 greatestChange = 0
+maxChange = 0
 for key, label in fields.items():
     (latest_val) = float(latestvalue[key])
     (prev_val) =  float(previousvalue[key])
@@ -54,11 +59,15 @@ for key, label in fields.items():
     percent_change = ((latest_val - prev_val) / prev_val) * 100
     
     if abs(percent_change) >= 5:
+        
         greatestChange = max(greatestChange, percent_change)
+        if abs(maxChange) < greatestChange:
+            maxChange = percent_change
+        
         need_news = True
 
-#get news from that stock (this case TSLA) using news API
-if True:
+#get news from that stock (this case TSLA) using news API if any stock > 5% change
+if need_news:
     url = "https://newsapi.org/v2/everything"
     params = {
         "apiKey": news_API,
@@ -74,25 +83,27 @@ if True:
     #get 3 most recent sources
     data = data['articles']
     sorted_articles = sorted(data, key = lambda x: x['publishedAt'], reverse= True)
-    recent_sources = [article['source']['name'] for article in sorted_articles[:3]]
-    print(recent_sources)
+    recent_sources = [article for article in sorted_articles[:3]]
 
-
-## STEP 2: Use https://newsapi.org
-# Instead of printing ("Get News"), actually get the first 3 news pieces for the COMPANY_NAME. 
-
-## STEP 3: Use https://www.twilio.com
-# Send a seperate message with the percentage change and each article's title and description to your phone number. 
-
-
-#Optional: Format the SMS message like this: 
-"""
-TSLA: 🔺2%
-Headline: Were Hedge Funds Right About Piling Into Tesla Inc. (TSLA)?. 
-Brief: We at Insider Monkey have gone over 821 13F filings that hedge funds and prominent investors are required to file by the SEC The 13F filings show the funds' and investors' portfolio positions as of March 31st, near the height of the coronavirus market crash.
-or
-"TSLA: 🔻5%
-Headline: Were Hedge Funds Right About Piling Into Tesla Inc. (TSLA)?. 
-Brief: We at Insider Monkey have gone over 821 13F filings that hedge funds and prominent investors are required to file by the SEC The 13F filings show the funds' and investors' portfolio positions as of March 31st, near the height of the coronavirus market crash.
-"""
-
+    if maxChange < 0:
+        for article in recent_sources:
+            client = Client(account_SID, twilio_API)
+            message = client.messages.create(
+            body=f"TSLA: 🔻{greatestChange}%\n{recent_sources["author"]}:{recent_sources["title"]}\n{recent_sources["description"]}\n{recent_sources["url"]}",
+            #twilio phone number
+            from_="+18557188705",
+            #mine phone number
+            to="+18179752705",
+            )
+            print(message.status)
+    else:
+        for article in recent_sources:
+            client = Client(account_SID, twilio_API)
+            message = client.messages.create(
+            body=f"TSLA: 🔺{greatestChange}%\n{recent_sources["author"]}:{recent_sources["title"]}\n{recent_sources["description"]}\n{recent_sources["url"]}",
+            #twilio phone number
+            from_="+18557188705",
+            #mine phone number
+            to="+18179752705",
+            )
+            print(message.status)
