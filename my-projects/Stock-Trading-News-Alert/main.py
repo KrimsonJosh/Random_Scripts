@@ -6,6 +6,7 @@ load_dotenv()
 alpha_API = os.getenv("API_KEY")
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
+need_news = False
 
 parameters = {
     "apikey": alpha_API,
@@ -34,14 +35,14 @@ fields = {
 }
 
 for key, label in fields.items():
-    latest_val = (latestvalue[key])
-    prev_val = (previousvalue[key])
+    (latest_val) = float(latestvalue[key])
+    (prev_val) =  float(previousvalue[key])
     
 
     percent_change = ((latest_val - prev_val) / prev_val) * 100
     
     if abs(percent_change) >= 5:
-        print("Get News")
+        need_news = True
 
 ## STEP 1: Use https://www.alphavantage.co
 # When STOCK price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
