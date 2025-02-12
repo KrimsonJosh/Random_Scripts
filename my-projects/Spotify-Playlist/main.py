@@ -67,3 +67,11 @@ for song in songnames:
         song_urls.append(uri)
     except IndexError:
         print(f"{song} doesn't exist in Spotify. Skipped.")
+
+# Create Playlist and load songs into it
+
+my_playlist = sp.user_playlist_create(user=f"{user_id}", 
+                                      name=f"{TravelYear} Billboard 100", 
+                                      public=False,
+                                      description="Top Tracks from back in the Dayz of Brunel")
+sp.playlist_add_items(playlist_id=my_playlist["id"], items=song_urls)
