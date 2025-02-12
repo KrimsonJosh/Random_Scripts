@@ -45,7 +45,6 @@ headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Ge
 response = requests.get(url=url, headers = headers)
 response.raise_for_status()
 
-
 # Turn that shit into soup 
 
 response = response.text 
@@ -54,4 +53,17 @@ soup = BeautifulSoup(response, "html.parser")
 listOf100 = soup.select('li ul li h3')
 songnames = [song.getText().strip() for song in listOf100]
 
+# Search Spotify for URL's
 
+user_id = sp.current_user(["id"])
+song_urls = []
+year = TravelYear.split("-")[0]
+
+for song in songnames:
+    result = sp.search(q=f"track:{song} year:{year}", type="track")
+    print(result)
+    try:
+        uri = result["tracks"]["items"][0]["uri"]
+        song_urls.append(uri)
+    except IndexError:
+        print(f"{song} doesn't exist in Spotify. Skipped.")
