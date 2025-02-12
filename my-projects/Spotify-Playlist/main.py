@@ -1,6 +1,30 @@
 import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
+import os
+from dotenv import load_dotenv 
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+load_dotenv()
+# API KEYS
+
+spotify_client = os.getenv("client_ID")
+spotify_secret = os.getenv("client_SECRET")
+
+spotify_redirect_URL = "http://example.com"
+
+# Authorization with SPOTIPY 
+
+sp = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(
+        scope="playlist-modify-private",
+        redirect_uri= spotify_redirect_URL,
+        client_id= spotify_client,
+        client_secret= spotify_secret,
+        show_dialog=True,
+        cache_path="token.txt",
+    )
+)
 
 # Try Catch for inputting correct TimeStamp
 # Test with 2000-08-12
@@ -30,4 +54,4 @@ soup = BeautifulSoup(response, "html.parser")
 listOf100 = soup.select('li ul li h3')
 songnames = [song.getText().strip() for song in listOf100]
 
-print(songnames)
+
