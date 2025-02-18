@@ -1,9 +1,26 @@
 from selenium import webdriver 
 from selenium.webdriver.common.by import By 
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 import time
 from dotenv import load_dotenv 
 import os 
+
+'''
+This method aborts an application(in linkedin)
+if that application doesn't meet the requests 
+
+Requests = must be ez apply
+'''
+
+def abort_application():
+
+    close_button = driver.find_element(by=By.CLASS_NAME, value="artdeco-modal__dismiss")
+    close_button.click()
+
+    time.sleep(2)
+    discard_button = driver.find_elements(by=By.CLASS_NAME, value="artdeco-modal__confirm-dialog-btn")[1]
+    discard_button.click()
 
 load_dotenv()
 myemail = os.getenv('my_username')
@@ -31,6 +48,30 @@ email.send_keys(myemail)
 password.send_keys(pwd)
 enter.click()
 
+time.sleep(3)
+all_listings = driver.find_elements(by=By.CSS_SELECTOR, value=".job-card-container--clickable")
+# automate job applying with easy apply
+for listing in all_listings:
+    listing.click()
+    try:
+        easy_apply = driver.find_element(By.XPATH, value = '//*[@id="ember154"]')
+        easy_apply.click()
+        #enter in phone 
+    
+        phone_enter = driver.find_element(By.XPATH, value = '//*[@id="single-line-text-form-component-formElement-urn-li-jobs-applyformcommon-easyApplyFormElement-4157348114-9-phoneNumber-nationalNumber"]')
+        phone_enter.send_keys('8179752705')
+
+        #enter
+        submit_resume = driver.find_element(By.CSS_SELECTOR, value = 'footer button')
+        submit_resume.click()
+        time.sleep(2)
+        close_button = driver.find_element(by=By.CLASS_NAME, value="artdeco-modal__dismiss")
+        close_button.click()
+
+    except NoSuchElementException:
+        abort_application()
+        continue 
+    
 
 
 
