@@ -1,7 +1,7 @@
 import requests
 import base64
 import json
-
+import time
 # -----------------------------------------------------------------------
 # 1) DETECTION / PARSING FUNCTIONS (with some expansions as requested)
 # -----------------------------------------------------------------------
@@ -444,6 +444,7 @@ def main():
 
     for repo_name in repos:
         audited = audit_repo(owner, repo_name, chapter=chapter_name, token=token)
+        time.sleep(2)
         if not audited:
             # Some error occurred
             continue
