@@ -83,23 +83,26 @@ def process_repo(owner, repo, chapter_name, headers):
     contrib = get_file_content(owner, repo, "CONTRIBUTING.md", headers)
     info["CONTRIBUTING.md"] = "✅" if contrib else "❌"
 
-    # 12) & 13) Open Issues & Open PRs
-    issues_url = repo_data["url"] + "/issues"
-    # For open issues, filter out PRs
-    # For open PRs, if 0 => "N/A"
-    # We'll just do a simpler approach for example's sake:
-    # In a real scenario, you'd call GitHub's issues & pulls endpoints directly.
-    # We'll do a quick fetch here:
+    # 12) Open Issues (excluding PRs)
+    issues_url = f"https://api.github.com/repos/{owner}/{repo}/issues?state=open"
+    response = requests.get(issues_url, headers=headers)
+    if response.status_code == 200:
+        issues = response.json()
+        open_issues = [issue for issue in issues if "pull_request" not in issue]
+        info["Open Issues"] = len(open_issues)
+    else:
+        info["Open Issues"] = "N/A"
 
-    # Instead, let's rely on your `get_repo_data` approach again or direct requests:
-    # (For brevity, we won't fully implement that here. We'll just store "N/A".)
-    info["Open Issues"] = "N/A"
-    info["Open PRs"] = "N/A"
-
-    # 14) Issue Templates => "✅" or "❌"
+    # 13) Open PRs
+    prs_url = f"https://api.github.com/repos/{owner}/{repo}/pulls?state=open"
+    prs_resp = requests.get(prs_url, headers=headers)
+    if prs_resp.status_code == 200:
+        open_prs = prs_resp.json()
+        info["Open PRs"] = len(open_prs)
+    else:
+        info["Open PRs"] = "N/A"
     issue_template = get_file_content(owner, repo, ".github/ISSUE_TEMPLATE", headers)
     info["Issue Templates"] = "✅" if issue_template else "❌"
-
     # 15) Labeling System (describe)
     # 16) Tag System (describe)
     # 17) Associated Project Board (link)
